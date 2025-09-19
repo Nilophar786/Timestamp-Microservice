@@ -21,9 +21,15 @@ app.get('/api/:date?', (req, res) => {
     });
   }
 
-  // If dateString is a number (unix timestamp in milliseconds)
-  if (/^\d+$/.test(dateString)) {
-    dateString = parseInt(dateString);
+  // If dateString is a number string (allow negative for timestamps before epoch)
+  if (/^-?\d+$/.test(dateString)) {
+    let num = parseInt(dateString);
+
+    // If it's in seconds (10 digits), convert to milliseconds
+    if (Math.abs(num).toString().length === 10) {
+      num = num * 1000;
+    }
+    dateString = num;
   }
 
   const date = new Date(dateString);
@@ -33,7 +39,7 @@ app.get('/api/:date?', (req, res) => {
   }
 
   return res.json({
-    unix: date.getTime(),
+    unix: Number(date.getTime()),
     utc: date.toUTCString()
   });
 });
